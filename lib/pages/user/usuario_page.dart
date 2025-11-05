@@ -1,8 +1,8 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
-import '../models/usuario_model.dart';
-import '../services/usuario_service.dart';
+import 'package:BookCLUB/models/profile_model.dart';
+import 'package:BookCLUB/repositories/userRepository.dart';
 
 class UsuarioPage extends StatefulWidget {
   const UsuarioPage({Key? key}) : super(key: key);
@@ -12,9 +12,10 @@ class UsuarioPage extends StatefulWidget {
 }
 
 class _UsuarioPageState extends State<UsuarioPage> {
-  final UsuarioService _service = UsuarioService();
-  Usuario? usuario;
+  final UserRepository _userRepository = UserRepository();
+  Profile? profile;
   File? _fotoPerfil;
+  bool _isLoading = false;
 
   @override
   void initState() {
@@ -23,16 +24,19 @@ class _UsuarioPageState extends State<UsuarioPage> {
   }
 
   Future<void> _carregarUsuario() async {
+    setState(() => _isLoading = true);
     try {
-      final user = await _service.getUsuario(1); // 👈 ID fixo por enquanto
-      setState(() => usuario = user);
+      final perfil = await _userRepository.getProfile();
+      setState(() => profile = perfil);
     } catch (e) {
-      debugPrint('Erro: $e');
+      debugPrint('Erro ao carregar usuário: $e');
+    } finally {
+      setState(() => _isLoading = false);
     }
   }
 
   Future<void> _escolherFoto() async {
-    final ImagePicker picker = ImagePicker();
+    final picker = ImagePicker();
     final XFile? imagem = await picker.pickImage(source: ImageSource.gallery);
     if (imagem != null) {
       setState(() => _fotoPerfil = File(imagem.path));
@@ -40,13 +44,13 @@ class _UsuarioPageState extends State<UsuarioPage> {
   }
 
   Future<void> _editarPerfil() async {
-    if (usuario == null) return;
+    if (profile == null) return;
 
     final resultado = await showDialog<Map<String, String>?>(
       context: context,
       builder: (context) {
-        String nome = usuario!.nome;
-        String bio = usuario!.bio;
+        String nome = profile!.name ?? '';
+        String bio = profile!.bio ?? '';
 
         return AlertDialog(
           title: const Text('Editar perfil'),
@@ -82,19 +86,35 @@ class _UsuarioPageState extends State<UsuarioPage> {
 
     if (resultado != null) {
       setState(() {
-        usuario!.nome = resultado['nome']!;
-        usuario!.bio = resultado['bio']!;
+        profile!.name = resultado['nome'];
+        profile!.bio = resultado['bio'];
       });
 
-      await _service.atualizarUsuario(usuario!); // 👈 Envia pra API
+      try {
+        await _userRepository.updateProfile(profile!);
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Perfil atualizado com sucesso!')),
+        );
+      } catch (e) {
+        debugPrint('Erro ao atualizar perfil: $e');
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Erro ao atualizar perfil')),
+        );
+      }
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    if (usuario == null) {
+    if (_isLoading) {
       return const Scaffold(
         body: Center(child: CircularProgressIndicator()),
+      );
+    }
+
+    if (profile == null) {
+      return const Scaffold(
+        body: Center(child: Text('Não foi possível carregar o usuário')),
       );
     }
 
@@ -112,34 +132,41 @@ class _UsuarioPageState extends State<UsuarioPage> {
                   backgroundColor: const Color(0xFF7B3EFF),
                   backgroundImage: _fotoPerfil != null
                       ? FileImage(_fotoPerfil!)
-                      : (usuario!.fotoUrl != null
-                          ? NetworkImage(usuario!.fotoUrl!)
+                      : (profile!.profilePicture != null
+                          ? NetworkImage(profile!.profilePicture!)
                           : null) as ImageProvider?,
-                  child: (_fotoPerfil == null && usuario!.fotoUrl == null)
+                  child: (_fotoPerfil == null &&
+                          profile!.profilePicture == null)
                       ? const Icon(Icons.camera_alt,
                           color: Colors.white, size: 40)
                       : null,
                 ),
               ),
               const SizedBox(height: 15),
-              Text(usuario!.nome,
-                  style: const TextStyle(
-                      fontSize: 22,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black)),
-              Text(usuario!.usuario,
-                  style: const TextStyle(fontSize: 16, color: Colors.grey)),
+              Text(
+                profile!.name ?? '',
+                style: const TextStyle(
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black,
+                ),
+              ),
               const SizedBox(height: 10),
-              Text(usuario!.bio,
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(fontSize: 15, color: Colors.black87)),
+              Text(
+                profile!.bio ?? '',
+                textAlign: TextAlign.center,
+                style: const TextStyle(fontSize: 15, color: Colors.black87),
+              ),
               const SizedBox(height: 20),
               ElevatedButton(
                 onPressed: _editarPerfil,
                 style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF7B3EFF)),
-                child: const Text('Editar perfil',
-                    style: TextStyle(color: Colors.white)),
+                  backgroundColor: const Color(0xFF7B3EFF),
+                ),
+                child: const Text(
+                  'Editar perfil',
+                  style: TextStyle(color: Colors.white),
+                ),
               ),
             ],
           ),

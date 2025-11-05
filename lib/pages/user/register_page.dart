@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:BookCLUB/repositories/userRepository.dart';
+import 'package:BookCLUB/config/routes.dart';
 
 class RegisterPage extends StatefulWidget {
   const RegisterPage({super.key});
@@ -9,18 +11,39 @@ class RegisterPage extends StatefulWidget {
 
 class _RegisterPageState extends State<RegisterPage> {
   final _formKey = GlobalKey<FormState>();
+  final _usernameController = TextEditingController();
   final _nameController = TextEditingController();
   final _emailController = TextEditingController();
-  final _confirmEmailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
 
   bool _obscurePassword = true;
+  bool _isLoading = false;
 
-  void _onRegister() {
-    if (_formKey.currentState!.validate()) {
+  final UserRepository _userRepository = UserRepository();
+
+  void _onRegister() async {
+    if (!_formKey.currentState!.validate()) return;
+
+    setState(() => _isLoading = true);
+
+    final usuario = await _userRepository.registerUser(
+      username: _usernameController.text,
+      email: _emailController.text,
+      password: _passwordController.text,
+      name: _nameController.text,
+    );
+
+    setState(() => _isLoading = false);
+
+    if (usuario != null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Conta criada com sucesso!')),
+      );
+      Navigator.pushReplacementNamed(context, AppRoutes.login);
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Erro ao criar conta. Tente novamente.')),
       );
     }
   }
@@ -46,31 +69,54 @@ class _RegisterPageState extends State<RegisterPage> {
                     children: [
                       Icon(Icons.menu_book_rounded, color: purple, size: 28),
                       const SizedBox(width: 8),
-                      Text("BookCLUB",
-                          style: TextStyle(
-                              color: purple,
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold)),
+                      Text(
+                        "BookCLUB",
+                        style: TextStyle(
+                          color: purple,
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
                     ],
                   ),
                   const SizedBox(height: 40),
-                  Text("Cadastre-se",
-                      style: TextStyle(
-                          color: purple,
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold)),
+                  Text(
+                    "Cadastre-se",
+                    style: TextStyle(
+                      color: purple,
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
                   const SizedBox(height: 8),
                   const Text(
-                      "Entre na maior rede social de livro da cidade de Americana!",
-                      style: TextStyle(fontSize: 14, color: Colors.black87)),
+                    "Entre na maior rede social de livros da cidade de Americana!",
+                    style: TextStyle(fontSize: 14, color: Colors.black87),
+                  ),
                   const SizedBox(height: 30),
 
-                  // Nome
+                  // Username
+                  TextFormField(
+                    controller: _usernameController,
+                    decoration: InputDecoration(
+                      labelText: 'Username',
+                      hintText: 'Digite seu username',
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                        borderSide: BorderSide(color: purple),
+                      ),
+                    ),
+                    validator: (v) =>
+                        v == null || v.isEmpty ? 'Digite seu username' : null,
+                  ),
+                  const SizedBox(height: 20),
+
+                  // Name
                   TextFormField(
                     controller: _nameController,
                     decoration: InputDecoration(
                       labelText: 'Nome',
-                      hintText: 'Digite seu Nome',
+                      hintText: 'Digite seu nome',
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(8),
                         borderSide: BorderSide(color: purple),
@@ -86,7 +132,7 @@ class _RegisterPageState extends State<RegisterPage> {
                     controller: _emailController,
                     decoration: InputDecoration(
                       labelText: 'E-mail',
-                      hintText: 'Digite seu E-mail',
+                      hintText: 'Digite seu e-mail',
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(8),
                         borderSide: BorderSide(color: purple),
@@ -102,29 +148,13 @@ class _RegisterPageState extends State<RegisterPage> {
                   ),
                   const SizedBox(height: 20),
 
-                  // Confirmar Email
-                  TextFormField(
-                    controller: _confirmEmailController,
-                    decoration: InputDecoration(
-                      labelText: 'Confirme seu E-mail',
-                      hintText: 'Confirme seu E-mail',
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
-                        borderSide: BorderSide(color: purple),
-                      ),
-                    ),
-                    validator: (v) =>
-                        v != _emailController.text ? 'E-mails não conferem' : null,
-                  ),
-                  const SizedBox(height: 20),
-
-                  // Senha
+                  // Password
                   TextFormField(
                     controller: _passwordController,
                     obscureText: _obscurePassword,
                     decoration: InputDecoration(
                       labelText: 'Senha',
-                      hintText: 'Digite sua Senha',
+                      hintText: 'Digite sua senha',
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(8),
                         borderSide: BorderSide(color: purple),
@@ -146,20 +176,21 @@ class _RegisterPageState extends State<RegisterPage> {
                   ),
                   const SizedBox(height: 20),
 
-                  // Confirmar Senha
+                  // Confirm Password
                   TextFormField(
                     controller: _confirmPasswordController,
                     obscureText: _obscurePassword,
                     decoration: InputDecoration(
-                      labelText: 'Confirme a sua senha',
-                      hintText: 'Confirme sua Senha',
+                      labelText: 'Confirme a senha',
+                      hintText: 'Confirme sua senha',
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(8),
                         borderSide: BorderSide(color: purple),
                       ),
                     ),
-                    validator: (v) =>
-                        v != _passwordController.text ? 'Senhas não conferem' : null,
+                    validator: (v) => v != _passwordController.text
+                        ? 'Senhas não conferem'
+                        : null,
                   ),
                   const SizedBox(height: 30),
 
@@ -171,21 +202,38 @@ class _RegisterPageState extends State<RegisterPage> {
                       style: ElevatedButton.styleFrom(
                         backgroundColor: yellow,
                         shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8)),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
                       ),
-                      onPressed: _onRegister,
-                      child: const Text("CRIAR CONTA",
-                          style: TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 16)),
+                      onPressed: _isLoading ? null : _onRegister,
+                      child: _isLoading
+                          ? const CircularProgressIndicator(color: Colors.white)
+                          : const Text(
+                              "CRIAR CONTA",
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 16,
+                              ),
+                            ),
                     ),
                   ),
-
                   const SizedBox(height: 16),
-                  const Center(
-                    child: Text("Já tenho conta",
-                        style: TextStyle(color: Colors.black87)),
+                  Center(
+                    child: TextButton(
+                      onPressed: () {
+                        Navigator.pushReplacementNamed(
+                            context, AppRoutes.login);
+                      },
+                      child: const Text(
+                        "Já tenho conta",
+                        style: TextStyle(
+                          color: Colors.black87,
+                          fontWeight: FontWeight.bold,
+                          decoration: TextDecoration.none,
+                        ),
+                      ),
+                    ),
                   ),
                 ],
               ),

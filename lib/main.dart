@@ -1,8 +1,17 @@
 import 'package:flutter/material.dart';
-import 'pages/login_page.dart';
-import 'pages/usuario_page.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
-void main() {
+// Pages
+import 'package:BookCLUB/pages/user/login_page.dart';
+import 'package:BookCLUB/pages/user/register_page.dart';
+import 'package:BookCLUB/pages/user/usuario_page.dart';
+
+// Config
+import 'package:BookCLUB/config/routes.dart';
+
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
   runApp(const BookClubApp());
 }
 
@@ -19,7 +28,12 @@ class BookClubApp extends StatelessWidget {
         useMaterial3: true,
         fontFamily: 'Roboto',
       ),
-      home: const LoginPage(),
+      initialRoute: AppRoutes.login,
+      routes: {
+        AppRoutes.login: (context) => const LoginPage(),
+        AppRoutes.signup: (context) => const RegisterPage(),
+        AppRoutes.perfil: (context) => const UsuarioPage(),
+      },
     );
   }
 }
