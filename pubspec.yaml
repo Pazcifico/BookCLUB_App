@@ -1,5 +1,5 @@
-name: bookclub
-description: Aplicativo BookCLUB - Login e Cadastro de Usuários
+name: BookCLUB
+description: Aplicativo BookCLUB - Grupos e Chats para clubes do livro.
 publish_to: 'none' # não será publicado no pub.dev
 version: 1.0.0+1
 
@@ -9,10 +9,11 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-
+  flutter_dotenv: ^6.0.0
   image_picker: ^1.0.4
-
   shared_preferences: ^2.2.3
+  http: ^1.5.0
+
 
   # Ícones e Material 3
   cupertino_icons: ^1.0.8

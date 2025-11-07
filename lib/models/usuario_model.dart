@@ -1,37 +1,36 @@
 class Usuario {
-  final int id;
-  String nome;
-  String usuario;
-  String bio;
-  String? fotoUrl;
+  final int? id;
+  String username;
+  String email;
+  String name;
+  String? password; // opcional (usado só no cadastro ou login)
 
   Usuario({
-    required this.id,
-    required this.nome,
-    required this.usuario,
-    required this.bio,
-    this.fotoUrl,
+    this.id,
+    required this.username,
+    required this.email,
+    required this.name,
+    this.password,
   });
 
-
+  // Converter de JSON para objeto Dart
   factory Usuario.fromJson(Map<String, dynamic> json) {
     return Usuario(
       id: json['id'],
-      nome: json['nome'],
-      usuario: json['usuario'],
-      bio: json['bio'] ?? '',
-      fotoUrl: json['fotoUrl'],
+      username: json['username'],
+      email: json['email'],
+      name: json['name'] ?? '',
     );
   }
 
-
+  // Converter objeto Dart para JSON
   Map<String, dynamic> toJson() {
     return {
-      'id': id,
-      'nome': nome,
-      'usuario': usuario,
-      'bio': bio,
-      'fotoUrl': fotoUrl,
+      if (id != null) 'id': id,
+      'username': username,
+      'email': email,
+      'name': name,
+      if (password != null) 'password': password,
     };
   }
 }

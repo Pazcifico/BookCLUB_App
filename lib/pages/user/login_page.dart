@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:BookCLUB/repositories/userRepository.dart';
+import 'package:BookCLUB/config/routes.dart';
+
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -14,6 +17,9 @@ class _LoginPageState extends State<LoginPage> {
   final _passwordController = TextEditingController();
   bool _rememberMe = false;
   bool _obscurePassword = true;
+  bool _isLoading = false;
+
+  final UserRepository _userRepository = UserRepository();
 
   @override
   void initState() {
@@ -39,15 +45,35 @@ class _LoginPageState extends State<LoginPage> {
       await prefs.setString('email', _emailController.text);
       await prefs.setString('password', _passwordController.text);
     } else {
-      await prefs.clear();
+      await prefs.remove('remember_me');
+      await prefs.remove('email');
+      await prefs.remove('password');
     }
   }
 
-  void _onLogin() {
-    if (_formKey.currentState!.validate()) {
-      _saveCredentials();
+  void _onLogin() async {
+    if (!_formKey.currentState!.validate()) return;
+
+    setState(() => _isLoading = true);
+
+    final token = await _userRepository.login(
+      usernameOrEmail: _emailController.text,
+      password: _passwordController.text,
+    );
+
+    setState(() => _isLoading = false);
+
+    if (token != null) {
+      await _saveCredentials();
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Login realizado com sucesso!')),
+      );
+
+      // Navega para a página principal usando rota nomeada
+      Navigator.pushReplacementNamed(context, AppRoutes.perfil);
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Usuário ou senha inválidos')),
       );
     }
   }
@@ -87,11 +113,12 @@ class _LoginPageState extends State<LoginPage> {
                           fontSize: 24,
                           fontWeight: FontWeight.bold)),
                   const SizedBox(height: 8),
-                  const Text("Compartilhe livros e adentre novos mundos literários.",
+                  const Text(
+                      "Compartilhe livros e adentre novos mundos literários.",
                       style: TextStyle(fontSize: 14, color: Colors.black87)),
                   const SizedBox(height: 30),
 
-                  // Email
+                  // E-mail
                   TextFormField(
                     controller: _emailController,
                     decoration: InputDecoration(
@@ -103,11 +130,8 @@ class _LoginPageState extends State<LoginPage> {
                       ),
                     ),
                     validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Digite seu e-mail';
-                      }
-                      if (!RegExp(r'^[\w\.-]+@[\w\.-]+\.\w+$')
-                          .hasMatch(value)) {
+                      if (value == null || value.isEmpty) return 'Digite seu e-mail';
+                      if (!RegExp(r'^[\w\.-]+@[\w\.-]+\.\w+$').hasMatch(value)) {
                         return 'E-mail inválido';
                       }
                       return null;
@@ -143,7 +167,6 @@ class _LoginPageState extends State<LoginPage> {
                     validator: (value) =>
                         value == null || value.isEmpty ? 'Digite sua senha' : null,
                   ),
-
                   const SizedBox(height: 10),
 
                   // Lembre-me
@@ -171,12 +194,16 @@ class _LoginPageState extends State<LoginPage> {
                         shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(8)),
                       ),
-                      onPressed: _onLogin,
-                      child: const Text("ENTRAR",
-                          style: TextStyle(
+                      onPressed: _isLoading ? null : _onLogin,
+                      child: _isLoading
+                          ? const CircularProgressIndicator(
                               color: Colors.white,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 16)),
+                            )
+                          : const Text("ENTRAR",
+                              style: TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 16)),
                     ),
                   ),
 
@@ -192,7 +219,10 @@ class _LoginPageState extends State<LoginPage> {
                           shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(8)),
                         ),
-                        onPressed: () {},
+                        onPressed: () {
+                          // Navega usando rota nomeada
+                          Navigator.pushNamed(context, AppRoutes.signup);
+                        },
                         child: const Text("Criar Conta",
                             style: TextStyle(
                                 color: Colors.white,
