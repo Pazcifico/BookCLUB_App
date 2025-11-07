@@ -1,1 +1,7 @@
 flutter run $(cat .env | sed 's/^/--dart-define=/')
+
+
+class ApiConfig {
+  static String get baseUrl => const String.fromEnvironment('API_DOMAIN_API', defaultValue: '');
+}
+

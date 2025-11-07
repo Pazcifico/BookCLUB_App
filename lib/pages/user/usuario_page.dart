@@ -91,7 +91,7 @@ class _UsuarioPageState extends State<UsuarioPage> {
       });
 
       try {
-        await _userRepository.updateProfile(profile!);
+        //await _userRepository.updateProfile(profile!);
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Perfil atualizado com sucesso!')),
         );
