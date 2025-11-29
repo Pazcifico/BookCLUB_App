@@ -1,5 +1,8 @@
 class Profile {
   final int id;
+  final int userId;
+  final String username; // obrigatório
+
   String? name;
   String? bio;
   String? profilePicture;
@@ -7,31 +10,35 @@ class Profile {
 
   Profile({
     required this.id,
-    required this.name,
-    required this.bio,
+    required this.userId,
+    required this.username,
+    this.name,
+    this.bio,
     this.profilePicture,
     this.thumbnail,
   });
 
-  // Converter de JSON para objeto Dart
   factory Profile.fromJson(Map<String, dynamic> json) {
     return Profile(
-      id: json['id'],
+      id: (json['id'] != null) ? json['id'] as int : 0,       // valor default se null
+      userId: (json['user'] != null) ? json['user'] as int : 0,
+      username: json['username'] ?? '',                        // assegura string
       name: json['name'] ?? '',
       bio: json['bio'] ?? '',
-      profilePicture: json['profile_picture'],
-      thumbnail: json['thumbnail'],
+      profilePicture: json['profile_picture'] ?? '',
+      thumbnail: json['thumbnail'] ?? '',
     );
   }
 
-  // Converter objeto Dart para JSON
   Map<String, dynamic> toJson() {
     return {
       'id': id,
-      'name': name,
-      'bio': bio,
-      'profile_picture': profilePicture,
-      'thumbnail': thumbnail,
+      'user': userId,
+      'username': username,
+      'name': name ?? '',
+      'bio': bio ?? '',
+      'profile_picture': profilePicture ?? '',
+      'thumbnail': thumbnail ?? '',
     };
   }
 }

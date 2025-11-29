@@ -10,4 +10,18 @@ class ApiRoutes {
   static String changePassword = "$base/user/api/password/change/";
   static String profile = "$base/user/api/profile/";
   static String resetPassword = "$base/user/api/password/reset/request/";
+  static String refresh = "$base/api/token/refresh/";
+  static String userProfile(int userId) {return "$base/user/api/profile/$userId/";}
+
+  // Chats
+  static String chats = "$base/chat/api/chats/";
+
+  //Grupos
+  static String search = "$base/grupo/api/search/";
+  static String topicos(int grupoId) {return "$base/grupo/api/grupos/$grupoId/topicos/";}
+  static String membros = "$base/grupo/api/membros/selecionar/";
+  static String grupoCriar = "$base/grupo/api/criar/";
+  static String grupoEditar(int grupoId) {return "$base/grupo/api/editar/$grupoId/";}
+  static String grupoSair(int grupoId) {return "$base/grupo/api/sair/$grupoId/";}
+
 }

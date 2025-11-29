@@ -70,7 +70,7 @@ class _LoginPageState extends State<LoginPage> {
       );
 
       // Navega para a página principal usando rota nomeada
-      Navigator.pushReplacementNamed(context, AppRoutes.perfil);
+      Navigator.pushReplacementNamed(context, AppRoutes.home);
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Usuário ou senha inválidos')),

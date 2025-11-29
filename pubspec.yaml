@@ -29,7 +29,7 @@ flutter:
 
   # Caso use imagens (ex: ícones do Figma)
   assets:
-    - assets/images/
+    - assets/img/
 
   # Fonte Roboto (como no Figma)
   fonts:
