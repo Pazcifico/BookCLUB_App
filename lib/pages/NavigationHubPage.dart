@@ -82,12 +82,6 @@ class NavigationHubPage extends StatelessWidget {
 
               _buildButton(
                 context,
-                label: "Página de Tópico",
-                route: "/topico",
-              ),
-
-              _buildButton(
-                context,
                 label: "Página de Criar Grupo",
                 onPressed: () {
                   Navigator.push(

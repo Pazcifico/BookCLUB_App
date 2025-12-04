@@ -1,0 +1,1 @@
+flutter run $(cat .env | sed 's/^/--dart-define=/')

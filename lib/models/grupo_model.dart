@@ -4,6 +4,7 @@ class Grupo {
   final String? descricao;
   final bool? privado;
   final String? imagem;
+  final List<int>? membros; // IDs dos membros
 
   Grupo({
     this.id,
@@ -11,6 +12,7 @@ class Grupo {
     this.descricao,
     this.privado,
     this.imagem,
+    this.membros,
   });
 
   factory Grupo.fromJson(Map<String, dynamic> json) {
@@ -20,6 +22,9 @@ class Grupo {
       descricao: json['descricao']?.toString(),
       privado: json['privado'] != null ? json['privado'] as bool : null,
       imagem: json['imagem']?.toString(),
+      membros: json['membros'] != null
+          ? List<int>.from(json['membros'])
+          : null,
     );
   }
 
@@ -30,6 +35,7 @@ class Grupo {
       'descricao': descricao,
       'privado': privado,
       'imagem': imagem,
+      'membros': membros,
     };
   }
 }

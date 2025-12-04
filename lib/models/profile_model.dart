@@ -7,6 +7,9 @@ class Profile {
   String? bio;
   String? profilePicture;
   String? thumbnail;
+  int? followersCount;
+  int? followingCount;
+  int? livrosCount;
 
   Profile({
     required this.id,
@@ -16,19 +19,30 @@ class Profile {
     this.bio,
     this.profilePicture,
     this.thumbnail,
+    this.followersCount,
+    this.followingCount,
+    this.livrosCount,
   });
 
   factory Profile.fromJson(Map<String, dynamic> json) {
-    return Profile(
-      id: (json['id'] != null) ? json['id'] as int : 0,       // valor default se null
-      userId: (json['user'] != null) ? json['user'] as int : 0,
-      username: json['username'] ?? '',                        // assegura string
-      name: json['name'] ?? '',
-      bio: json['bio'] ?? '',
-      profilePicture: json['profile_picture'] ?? '',
-      thumbnail: json['thumbnail'] ?? '',
-    );
-  }
+  final id = int.tryParse(json['id'].toString()) ?? 0;
+  final userId = json.containsKey('user') 
+      ? int.tryParse(json['user'].toString()) ?? 0 
+      : id; // fallback se user não existir
+
+  return Profile(
+    id: id,
+    userId: userId,
+    username: json['username'] ?? '',
+    name: json['name'] ?? '',
+    bio: json['bio'] ?? '',
+    profilePicture: json['profile_picture'] ?? '',
+    thumbnail: json['thumbnail'] ?? '',
+    followersCount: json['followers_count'] ?? 0,
+    followingCount: json['following_count'] ?? 0,
+    livrosCount: json['livros_count'] ?? 0,
+  );
+}
 
   Map<String, dynamic> toJson() {
     return {
@@ -39,6 +53,9 @@ class Profile {
       'bio': bio ?? '',
       'profile_picture': profilePicture ?? '',
       'thumbnail': thumbnail ?? '',
+      'followers_count': followersCount ?? 0,
+      'following_count': followingCount ?? 0,
+      'livros_count': livrosCount ?? 0,
     };
   }
 }

@@ -48,7 +48,6 @@ class BookClubApp extends StatelessWidget {
         AppRoutes.hub: (context) => const NavigationHubPage(),
         AppRoutes.home: (context) => const HomePage(),
         AppRoutes.search: (context) => const SearchPage(),
-        AppRoutes.topic: (context) => const TopicPage(),
         AppRoutes.searchMembros: (context) => const SearchMembros(),
       },
 

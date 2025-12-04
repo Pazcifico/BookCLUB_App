@@ -12,7 +12,8 @@
         "flutter_dotenv",
         "http",
         "image_picker",
-        "shared_preferences"
+        "shared_preferences",
+        "web_socket_channel"
       ],
       "devDependencies": [
         "flutter_lints",
@@ -546,6 +547,22 @@
       "dependencies": [
         "meta",
         "path"
+      ]
+    },
+    {
+      "name": "web_socket_channel",
+      "version": "2.4.0",
+      "dependencies": [
+        "async",
+        "crypto",
+        "stream_channel"
+      ]
+    },
+    {
+      "name": "crypto",
+      "version": "3.0.7",
+      "dependencies": [
+        "typed_data"
       ]
     }
   ],

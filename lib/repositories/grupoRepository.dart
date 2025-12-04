@@ -6,6 +6,7 @@ import 'package:BookCLUB/config/api_routes.dart';
 import 'package:BookCLUB/models/grupo_model.dart';
 import 'package:BookCLUB/models/topico_model.dart';
 import 'package:BookCLUB/models/profile_model.dart';
+import 'package:BookCLUB/models/mensagem_model.dart';
 import 'package:BookCLUB/repositories/userRepository.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
@@ -253,9 +254,8 @@ Future<bool> criarGrupo({
     // LISTA DE MEMBROS
     // --------------------------
     print(membros);
-    for (var id in membros) {
-      request.fields['membros[]'] = id.toString();
-    }
+    request.fields['membros'] = jsonEncode(membros);
+
 
     // --------------------------
     // IMAGEM
@@ -297,6 +297,286 @@ Future<bool> criarGrupo({
     return false;
   }
 }
+
+Future<bool> editarGrupo({
+  required Grupo grupo,
+  XFile? imagem,
+}) async {
+  try {
+    final prefs = await SharedPreferences.getInstance();
+    String? token = prefs.getString('access_token');
+
+    if (token == null) {
+      token = await _userRepository.refreshToken();
+      if (token == null) return false;
+    }
+
+    final uri = Uri.parse(ApiRoutes.grupoEditar(grupo.id!));
+
+    final request = http.MultipartRequest("PUT", uri);
+    request.headers["Authorization"] = "Bearer $token";
+
+    // --------------------------
+    // CAMPOS NORMAIS
+    // --------------------------
+    request.fields["nome"] = grupo.nome?.trim() ?? "";
+    request.fields["descricao"] = grupo.descricao?.trim() ?? "";
+    request.fields["privado"] = grupo.privado.toString();
+
+    // --------------------------
+    // IMAGEM
+    // --------------------------
+    if (imagem != null) {
+      if (kIsWeb) {
+        final bytes = await imagem.readAsBytes();
+        request.files.add(
+          http.MultipartFile.fromBytes(
+            "imagem",
+            bytes,
+            filename: imagem.name,
+          ),
+        );
+      } else {
+        request.files.add(
+          await http.MultipartFile.fromPath(
+            "imagem",
+            imagem.path,
+          ),
+        );
+      }
+    }
+
+    // --------------------------
+    // ENVIA REQUEST
+    // --------------------------
+    final streamed = await request.send();
+    final response = await http.Response.fromStream(streamed);
+
+    if (response.statusCode == 200 || response.statusCode == 201) {
+      return true;
+    }
+
+    print("❌ Erro ao editar grupo: ${response.statusCode} — ${response.body}");
+    return false;
+
+  } catch (e, s) {
+    print("❌ Erro no editarGrupo: $e");
+    print(s);
+    return false;
+  }
+}
+
+
+Future<List<Mensagem>> getMensagens(int topicoId) async {
+  try {
+    final prefs = await SharedPreferences.getInstance();
+    String? token = prefs.getString('access_token');
+
+    // Se o token expirou → tenta refresh
+    if (token == null) {
+      token = await _userRepository.refreshToken();
+      if (token == null) return [];
+    }
+
+    final url = Uri.parse(ApiRoutes.mensagens(topicoId));
+
+    var response = await http.get(
+      url,
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer $token",
+      },
+    );
+
+    // Se 401 → tenta refresh
+    if (response.statusCode == 401) {
+      final newToken = await _userRepository.refreshToken();
+      if (newToken == null) return [];
+
+      response = await http.get(
+        url,
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer $newToken",
+        },
+      );
+    }
+
+    if (response.statusCode == 200) {
+      final List data = jsonDecode(response.body);
+
+      return data
+          .map((json) => Mensagem.fromJson(json))
+          .toList()
+        ..sort((a, b) => a.criadoEm.compareTo(b.criadoEm));
+    }
+
+    print("❌ Erro ao buscar mensagens: ${response.statusCode}");
+    return [];
+
+  } catch (e, s) {
+    print("❌ Erro no getMensagens: $e");
+    print(s);
+    return [];
+  }
+}
+
+Future<bool> sairDoGrupo(int grupoId) async {
+  try {
+    final prefs = await SharedPreferences.getInstance();
+    String? token = prefs.getString('access_token');
+
+    // Se token expirou → tenta refresh
+    if (token == null) {
+      token = await _userRepository.refreshToken();
+      if (token == null) return false;
+    }
+
+    final url = Uri.parse(ApiRoutes.grupoSair(grupoId));
+
+    var response = await http.post(
+      url,
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer $token",
+      },
+    );
+
+    // Se 401 → tenta refresh
+    if (response.statusCode == 401) {
+      final newToken = await _userRepository.refreshToken();
+      if (newToken == null) return false;
+
+      response = await http.post(
+        url,
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer $newToken",
+        },
+      );
+    }
+
+    if (response.statusCode == 200 || response.statusCode == 204) {
+      return true;
+    }
+
+    print("❌ Erro ao sair do grupo: ${response.statusCode} — ${response.body}");
+    return false;
+
+  } catch (e, s) {
+    print("❌ Erro no sairDoGrupo: $e");
+    print(s);
+    return false;
+  }
+}
+
+Future<bool> entrarNoGrupo(int grupoId) async {
+  try {
+    final prefs = await SharedPreferences.getInstance();
+    String? token = prefs.getString('access_token');
+
+    // Se o token expirou → tenta refresh
+    if (token == null) {
+      token = await _userRepository.refreshToken();
+      if (token == null) return false;
+    }
+
+    final url = Uri.parse(ApiRoutes.grupoEntrar(grupoId));
+
+    var response = await http.post(
+      url,
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer $token",
+      },
+    );
+
+    // Se 401 → token expirado → tenta refresh
+    if (response.statusCode == 401) {
+      final newToken = await _userRepository.refreshToken();
+      if (newToken == null) return false;
+
+      response = await http.post(
+        url,
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer $newToken",
+        },
+      );
+    }
+
+    if (response.statusCode == 200 || response.statusCode == 201) {
+      return true;
+    }
+
+    print("❌ Erro ao entrar no grupo: ${response.statusCode} — ${response.body}");
+    return false;
+
+  } catch (e, s) {
+    print("❌ Erro no entrarNoGrupo: $e");
+    print(s);
+    return false;
+  }
+}
+
+Future<bool> addMembros(int grupoId, List<int> usuarioIds) async {
+  try {
+    final prefs = await SharedPreferences.getInstance();
+    String? token = prefs.getString('access_token');
+
+    // Se token expirou → tenta refresh
+    if (token == null) {
+      token = await _userRepository.refreshToken();
+      if (token == null) return false;
+    }
+
+    final url = Uri.parse(ApiRoutes.grupoAddMembros(grupoId));
+
+    var response = await http.post(
+      url,
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer $token",
+      },
+      body: jsonEncode({
+        "membros": usuarioIds, // 🔥 AQUI! — enviando como "membros"
+      }),
+    );
+
+    // Se 401 → tenta refresh
+    if (response.statusCode == 401) {
+      final newToken = await _userRepository.refreshToken();
+      if (newToken == null) return false;
+
+      response = await http.post(
+        url,
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer $newToken",
+        },
+        body: jsonEncode({
+          "membros": usuarioIds, // 🔥 mantém "membros"
+        }),
+      );
+    }
+
+    if (response.statusCode == 200 ||
+        response.statusCode == 201 ||
+        response.statusCode == 204) {
+      return true;
+    }
+
+    print("❌ Erro ao adicionar membros: ${response.statusCode} — ${response.body}");
+    return false;
+
+  } catch (e, s) {
+    print("❌ Erro no addMembros: $e");
+    print(s);
+    return false;
+  }
+}
+
+
 
 
 }
