@@ -119,17 +119,7 @@ class _SearchLivroState extends State<SearchLivro> {
                     ),
                   ),
 
-                  const SizedBox(width: 12),
-
-                  // Ícone de filtro
-                  Container(
-                    padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      color: Colors.orange.shade100,
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: const Icon(Icons.filter_list, color: Colors.orange),
-                  ),
+                  const SizedBox(width: 12)
                 ],
               ),
             ),

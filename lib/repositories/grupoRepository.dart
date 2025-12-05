@@ -226,77 +226,91 @@ class GrupoRepository {
     }
   }
 
-  Future<bool> criarGrupo({
-    required Grupo grupo,
-    required List<int> membros,
-    XFile? imagem,
-  }) async {
-    try {
-      final prefs = await SharedPreferences.getInstance();
-      String? token = prefs.getString('access_token');
+Future<bool> criarGrupo({
+  required Grupo grupo,
+  required List<int> membros,
+  XFile? imagem,
+}) async {
+  try {
+    final prefs = await SharedPreferences.getInstance();
+    String? token = prefs.getString('access_token');
 
-      if (token == null) {
-        token = await _userRepository.refreshToken();
-        if (token == null) return false;
-      }
+    if (token == null) {
+      token = await _userRepository.refreshToken();
+      if (token == null) return false;
+    }
 
+    Future<http.Response> enviar(String tokenAtual) async {
       final uri = Uri.parse(ApiRoutes.grupoCriar);
-
       final request = http.MultipartRequest('POST', uri);
-      request.headers['Authorization'] = 'Bearer $token';
 
-      // --------------------------
+      request.headers['Authorization'] = 'Bearer $tokenAtual';
+
       // CAMPOS NORMAIS
-      // --------------------------
       request.fields['nome'] = grupo.nome?.trim() ?? '';
       request.fields['descricao'] = grupo.descricao?.trim() ?? '';
       request.fields['privado'] = grupo.privado.toString();
 
-      // --------------------------
-      // LISTA DE MEMBROS
-      // --------------------------
-      print(membros);
-      request.fields['membros'] = jsonEncode(membros);
+      // LISTA DE MEMBROS (só envia se houver)
+      if (membros.isNotEmpty) {
+        request.fields['membros'] = jsonEncode(membros);
+      }
 
-      // --------------------------
       // IMAGEM
-      // --------------------------
       if (imagem != null) {
         if (kIsWeb) {
           final bytes = await imagem.readAsBytes();
-          final multipart = http.MultipartFile.fromBytes(
-            'imagem',
-            bytes,
-            filename: imagem.name,
+          request.files.add(
+            http.MultipartFile.fromBytes('imagem', bytes, filename: imagem.name),
           );
-          request.files.add(multipart);
         } else {
-          final multipart = await http.MultipartFile.fromPath(
-            'imagem',
-            imagem.path,
+          request.files.add(
+            await http.MultipartFile.fromPath('imagem', imagem.path),
           );
-          request.files.add(multipart);
         }
       }
 
-      // --------------------------
-      // ENVIA REQUEST
-      // --------------------------
       final streamed = await request.send();
-      final response = await http.Response.fromStream(streamed);
-
-      if (response.statusCode == 201) {
-        return true;
-      }
-
-      print("❌ Erro ao criar grupo: ${response.statusCode} — ${response.body}");
-      return false;
-    } catch (e, s) {
-      print("❌ Erro no criarGrupo: $e");
-      print(s);
-      return false;
+      return await http.Response.fromStream(streamed);
     }
+
+    // --------------------------
+    // 1️⃣ PRIMEIRA TENTATIVA
+    // --------------------------
+    http.Response response = await enviar(token);
+
+    // --------------------------
+    // 2️⃣ SE 401 → REFRESH TOKEN
+    // --------------------------
+    if (response.statusCode == 401) {
+      print("🔄 Token expirado — tentando refreshToken...");
+
+      final newToken = await _userRepository.refreshToken();
+      if (newToken == null) return false;
+
+      prefs.setString('access_token', newToken);
+
+      // tenta de novo com o novo token
+      response = await enviar(newToken);
+    }
+
+    // --------------------------
+    // 3️⃣ RESULTADO FINAL
+    // --------------------------
+    if (response.statusCode == 201) {
+      return true;
+    }
+
+    print("❌ Erro ao criar grupo: ${response.statusCode} — ${response.body}");
+    return false;
+
+  } catch (e, s) {
+    print("❌ Erro no criarGrupo: $e");
+    print(s);
+    return false;
   }
+}
+
 
   Future<bool> editarGrupo({
     required Grupo grupo,
