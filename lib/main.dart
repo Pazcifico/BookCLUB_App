@@ -50,36 +50,34 @@ class BookClubApp extends StatelessWidget {
         AppRoutes.search: (context) => const SearchPage(),
         AppRoutes.searchMembros: (context) => const SearchMembros(),
       },
-
       onGenerateRoute: (settings) {
-  final args = settings.arguments;
+        final args = settings.arguments;
 
-  switch (settings.name) {
-    case AppRoutes.group:
-      if (args is Grupo) {
+        switch (settings.name) {
+          case AppRoutes.group:
+            if (args is Grupo) {
+              return MaterialPageRoute(
+                builder: (_) => GroupPage(grupo: args),
+              );
+            }
+            break;
+
+          case AppRoutes.user:
+            if (args is Profile) {
+              return MaterialPageRoute(
+                builder: (_) => UserPage(profile: args),
+              );
+            }
+            break;
+        }
+
+        // Se chegou aqui, é porque o argumento estava errado
         return MaterialPageRoute(
-          builder: (_) => GroupPage(grupo: args),
+          builder: (_) => const Scaffold(
+            body: Center(child: Text("Argumento inválido para esta rota.")),
+          ),
         );
-      }
-      break;
-
-    case AppRoutes.user:
-      if (args is Profile) {
-        return MaterialPageRoute(
-          builder: (_) => UserPage(profile: args),
-        );
-      }
-      break;
-  }
-
-  // Se chegou aqui, é porque o argumento estava errado
-  return MaterialPageRoute(
-    builder: (_) => const Scaffold(
-      body: Center(child: Text("Argumento inválido para esta rota.")),
-    ),
-  );
-},
-
+      },
     );
   }
 }

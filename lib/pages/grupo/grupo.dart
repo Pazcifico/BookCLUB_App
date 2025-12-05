@@ -9,6 +9,7 @@ import 'package:BookCLUB/pages/grupo/addMembros.dart';
 import 'package:BookCLUB/pages/grupo/editGrupo.dart';
 import 'package:BookCLUB/repositories/userRepository.dart';
 import 'package:BookCLUB/models/profile_model.dart';
+import 'package:BookCLUB/pages/livro/search_livro.dart';
 
 class GroupPage extends StatefulWidget {
   final Grupo grupo;
@@ -102,11 +103,11 @@ class _GroupPageState extends State<GroupPage> {
           children: [
             CircleAvatar(
               radius: 20,
-              backgroundImage: widget.grupo.imagem != null &&
-                      widget.grupo.imagem!.isNotEmpty
-                  ? NetworkImage(GroupPage.base + widget.grupo.imagem!)
-                  : const AssetImage('assets/img/placeholder.jpg')
-                      as ImageProvider,
+              backgroundImage:
+                  widget.grupo.imagem != null && widget.grupo.imagem!.isNotEmpty
+                      ? NetworkImage(GroupPage.base + widget.grupo.imagem!)
+                      : const AssetImage('assets/img/placeholder.jpg')
+                          as ImageProvider,
             ),
             const SizedBox(width: 10),
             Text(
@@ -157,7 +158,12 @@ class _GroupPageState extends State<GroupPage> {
                   break;
 
                 case "criar":
-                  print("Criar tópico");
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => SearchLivro(grupo: widget.grupo),
+                    ),
+                  );
                   break;
 
                 case "sair":

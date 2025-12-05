@@ -28,6 +28,7 @@ class ApiRoutes {
   static String grupoEntrar(int grupoId) {return "$base/grupo/api/entrar/$grupoId/";}
   static String mensagens(int topicoId) {return"$base/grupo/api/mensagens/$topicoId/";}
   static String grupoAddMembros(int grupoId) {return "$base/grupo/api/add/membros/$grupoId/";}
+  static String topicoCriar (int grupoId) {return "$base/livro/api/criar-topico/$grupoId/";}
 
 
   //Resenhas
