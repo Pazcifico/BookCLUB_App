@@ -228,11 +228,6 @@ class _LoginPageState extends State<LoginPage> {
                                 color: Colors.white,
                                 fontWeight: FontWeight.bold)),
                       ),
-                      TextButton(
-                        onPressed: () {},
-                        child: const Text("Esqueci minha senha",
-                            style: TextStyle(color: Colors.black54)),
-                      ),
                     ],
                   ),
                 ],

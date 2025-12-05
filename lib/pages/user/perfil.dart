@@ -65,13 +65,6 @@ class _ProfilePageState extends State<ProfilePage> {
   List<PopupMenuEntry<String>> _menuOpcoes(BuildContext context) {
   return [
     const PopupMenuItem(
-      value: "trocar",
-      child: Text("Trocar de Senha"),
-    ),
-
-    const PopupMenuDivider(),
-
-    const PopupMenuItem(
       value: "sair",
       child: Text("Logout"),
     ),
@@ -181,12 +174,10 @@ Widget _buildHeader() {
           itemBuilder: _menuOpcoes,
           onSelected: (value) {
             switch (value) {
-              case "trocar":
-                print("Trocar Senha");
-                break;
-
+  
               case "sair":
-                print("Logout");
+                _userRepository.logout();
+                Navigator.pushReplacementNamed(context, AppRoutes.login);
                 break;
             }
           },

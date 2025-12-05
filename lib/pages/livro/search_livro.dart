@@ -181,7 +181,7 @@ class _SearchLivroState extends State<SearchLivro> {
                                               MainAxisAlignment.center,
                                           children: [
                                             Text(
-                                              livro.titulo,
+                                              livro.titulo!,
                                               maxLines: 2,
                                               overflow: TextOverflow.ellipsis,
                                               style: const TextStyle(

@@ -1,20 +1,20 @@
 class Livro {
   final int? id; // <-- pode ser null, porque vem do Google sem id local
-  final String titulo;
+  final String? titulo;
   final String? autor;
   final String? descricao;
   final String? capa;
   final String? anoPublicacao;
-  final String identificadorApi;
+  final String? identificadorApi;
 
   Livro({
     this.id,
-    required this.titulo,
+    this.titulo,
     this.autor,
     this.descricao,
     this.capa,
     this.anoPublicacao,
-    required this.identificadorApi,
+    this.identificadorApi,
   });
 
   factory Livro.fromJson(Map<String, dynamic> json) {

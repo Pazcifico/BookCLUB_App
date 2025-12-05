@@ -140,26 +140,34 @@ class UserRepository {
    *  LOGOUT
    * -------------------------------------------------------------------------- */
   Future<void> logout() async {
-    try {
-      final prefs = await SharedPreferences.getInstance();
-      final refresh = prefs.getString('refresh_token');
-      if (refresh == null) return;
+  try {
+    final prefs = await SharedPreferences.getInstance();
+    final refresh = prefs.getString('refresh_token');
+    final access = prefs.getString('access_token');
 
-      final url = Uri.parse(ApiRoutes.logout);
+    if (refresh == null || access == null) return;
 
-      await http.post(
-        url,
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({'refresh': refresh}),
-      );
+    final url = Uri.parse(ApiRoutes.logout);
 
-      await prefs.remove('access_token');
-      await prefs.remove('refresh_token');
-    } catch (e, s) {
-      print("❌ Exceção ao fazer logout: $e");
-      print("📜 StackTrace completo:\n$s");
-    }
+    final response = await http.post(
+      url,
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $access',
+      },
+      body: jsonEncode({'refresh': refresh}),
+    );
+
+    print("🔎 Logout response: ${response.statusCode} - ${response.body}");
+
+    // Mesmo com erro, removemos os tokens
+    await prefs.remove('access_token');
+    await prefs.remove('refresh_token');
+  } catch (e, s) {
+    print("❌ Exceção ao fazer logout: $e");
+    print("📜 StackTrace completo:\n$s");
   }
+}
 
   /* --------------------------------------------------------------------------
    *  PERFIL DO USUÁRIO
@@ -305,6 +313,68 @@ class UserRepository {
       return [];
     }
   }
+Future<bool> createResenha(Resenha resenha) async {
+  try {
+    final prefs = await SharedPreferences.getInstance();
+    String? token = prefs.getString('access_token');
+
+    token ??= await refreshToken();
+    if (token == null) return false;
+
+    final url = Uri.parse(ApiRoutes.resenhaCriar(
+      resenha.livro.id!,   // livro obrigatório
+    ));
+
+    // Monta o body usando a classe Resenha
+    final body = {
+      "nota": resenha.nota,
+      "comentario": resenha.comentario,
+    };
+
+    final response = await http.post(
+      url,
+      headers: {
+        'Accept': 'application/json',
+        'Authorization': 'Bearer $token',
+        'Content-Type': 'application/json',
+      },
+      body: jsonEncode(body),
+    );
+
+    if (response.statusCode == 201) {
+      return true;
+    }
+
+    if (response.statusCode == 400) {
+      print("⚠️ Erro 400 (Já existe resenha?): ${response.body}");
+      return false;
+    }
+
+    // Se for 401, atualiza token e tenta novamente
+    if (response.statusCode == 401) {
+      final newToken = await refreshToken();
+      if (newToken == null) return false;
+
+      final retry = await http.post(
+        url,
+        headers: {
+          'Accept': 'application/json',
+          'Authorization': 'Bearer $newToken',
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode(body),
+      );
+
+      return retry.statusCode == 201;
+    }
+
+    return false;  
+  } catch (e, s) {
+    print("❌ Exceção em createResenha: $e");
+    print("📜 StackTrace:\n$s");
+    return false;
+  }
+}
 
   /* --------------------------------------------------------------------------
    *  EDITAR PERFIL (Web + Mobile)

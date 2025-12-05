@@ -33,8 +33,6 @@ class ApiRoutes {
 
   //Resenhas
   static String resenhasListar(int userId) {return "$base/livro/api/resenha/$userId/"; }
-  static String resenhasCriar(int livroId) { return "$base/livro/api/resenhas/$livroId/";}
-
-
+  static String resenhaCriar(int livroId) { return "$base/livro/api/create/resenha/$livroId/";}
 
 }

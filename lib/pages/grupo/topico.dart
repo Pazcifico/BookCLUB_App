@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:path/path.dart' as p;
 
+import 'package:BookCLUB/pages/livro/resenha_page.dart';
 import 'package:BookCLUB/models/topico_model.dart';
 import 'package:BookCLUB/models/mensagem_model.dart';
 import 'package:BookCLUB/models/profile_model.dart';
@@ -341,6 +342,15 @@ void initState() {
       );
     }
   }
+  List<PopupMenuEntry<String>> _menuOpcoes(BuildContext context) {
+  
+      return [
+        const PopupMenuItem(
+          value: "avaliar",
+          child: Text("Avaliar livro"),
+        ),
+      ];
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -361,11 +371,24 @@ void initState() {
             color: Colors.black,
           ),
         ),
-        actions: const [
-          Padding(
-            padding: EdgeInsets.only(right: 16),
-            child: Icon(Icons.more_vert, color: Colors.amber),
-          )
+        actions: [
+         PopupMenuButton<String>(
+            icon: const Icon(Icons.more_vert, color: Colors.amber),
+            itemBuilder: (context) => _menuOpcoes(context),
+            onSelected: (value) async {
+              switch (value) {
+                case "avaliar":
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => ResenhaPage(livro: widget.topico.livro!),
+                    ),
+                  );
+                  break;
+              }
+            },
+          ),
+          const SizedBox(width: 12),
         ],
       ),
       body: Stack(
