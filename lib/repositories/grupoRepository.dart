@@ -61,11 +61,11 @@ class GrupoRepository {
         }
       }
 
-      print("❌ Erro ao buscar grupos: ${response.statusCode}");
+      print("Erro ao buscar grupos: ${response.statusCode}");
       return [];
     } catch (e, s) {
-      print("❌ Erro no getGruposUsuario: $e");
-      print("📜 StackTrace completo:\n$s");
+      print("Erro no getGruposUsuario: $e");
+      print("StackTrace completo:\n$s");
       return [];
     }
   }
@@ -168,10 +168,10 @@ class GrupoRepository {
         return data.map((item) => Topico.fromJson(item)).toList();
       }
 
-      print("❌ Erro ao buscar tópicos: ${response.statusCode}");
+      print("Erro ao buscar tópicos: ${response.statusCode}");
       return [];
     } catch (e, s) {
-      print("❌ Erro no getTopicosGrupo: $e");
+      print("Erro no getTopicosGrupo: $e");
       print(s);
       return [];
     }
@@ -217,11 +217,11 @@ class GrupoRepository {
         return data.map((json) => Profile.fromJson(json)).toList();
       }
 
-      print("❌ Erro ao buscar membros: ${response.statusCode}");
+      print("Erro ao buscar membros: ${response.statusCode}");
       return [];
     } catch (e, s) {
-      print("❌ Erro no selecionarMembros: $e");
-      print("📜 StackTrace:\n$s");
+      print("Erro no selecionarMembros: $e");
+      print("StackTrace:\n$s");
       return [];
     }
   }
@@ -283,7 +283,7 @@ Future<bool> criarGrupo({
     // 2️⃣ SE 401 → REFRESH TOKEN
     // --------------------------
     if (response.statusCode == 401) {
-      print("🔄 Token expirado — tentando refreshToken...");
+      print("Token expirado — tentando refreshToken...");
 
       final newToken = await _userRepository.refreshToken();
       if (newToken == null) return false;
@@ -301,11 +301,11 @@ Future<bool> criarGrupo({
       return true;
     }
 
-    print("❌ Erro ao criar grupo: ${response.statusCode} — ${response.body}");
+    print("Erro ao criar grupo: ${response.statusCode} — ${response.body}");
     return false;
 
   } catch (e, s) {
-    print("❌ Erro no criarGrupo: $e");
+    print("Erro no criarGrupo: $e");
     print(s);
     return false;
   }
@@ -371,10 +371,10 @@ Future<bool> criarGrupo({
       }
 
       print(
-          "❌ Erro ao editar grupo: ${response.statusCode} — ${response.body}");
+          "Erro ao editar grupo: ${response.statusCode} — ${response.body}");
       return false;
     } catch (e, s) {
-      print("❌ Erro no editarGrupo: $e");
+      print("Erro no editarGrupo: $e");
       print(s);
       return false;
     }
@@ -422,10 +422,10 @@ Future<bool> criarGrupo({
           ..sort((a, b) => a.criadoEm.compareTo(b.criadoEm));
       }
 
-      print("❌ Erro ao buscar mensagens: ${response.statusCode}");
+      print("Erro ao buscar mensagens: ${response.statusCode}");
       return [];
     } catch (e, s) {
-      print("❌ Erro no getMensagens: $e");
+      print("Erro no getMensagens: $e");
       print(s);
       return [];
     }
@@ -471,10 +471,10 @@ Future<bool> criarGrupo({
       }
 
       print(
-          "❌ Erro ao sair do grupo: ${response.statusCode} — ${response.body}");
+          "Erro ao sair do grupo: ${response.statusCode} — ${response.body}");
       return false;
     } catch (e, s) {
-      print("❌ Erro no sairDoGrupo: $e");
+      print("Erro no sairDoGrupo: $e");
       print(s);
       return false;
     }
@@ -520,10 +520,10 @@ Future<bool> criarGrupo({
       }
 
       print(
-          "❌ Erro ao entrar no grupo: ${response.statusCode} — ${response.body}");
+          "Erro ao entrar no grupo: ${response.statusCode} — ${response.body}");
       return false;
     } catch (e, s) {
-      print("❌ Erro no entrarNoGrupo: $e");
+      print("Erro no entrarNoGrupo: $e");
       print(s);
       return false;
     }
@@ -549,7 +549,7 @@ Future<bool> criarGrupo({
           "Authorization": "Bearer $token",
         },
         body: jsonEncode({
-          "membros": usuarioIds, // 🔥 AQUI! — enviando como "membros"
+          "membros": usuarioIds, 
         }),
       );
 
@@ -565,7 +565,7 @@ Future<bool> criarGrupo({
             "Authorization": "Bearer $newToken",
           },
           body: jsonEncode({
-            "membros": usuarioIds, // 🔥 mantém "membros"
+            "membros": usuarioIds,
           }),
         );
       }
@@ -577,10 +577,10 @@ Future<bool> criarGrupo({
       }
 
       print(
-          "❌ Erro ao adicionar membros: ${response.statusCode} — ${response.body}");
+          "Erro ao adicionar membros: ${response.statusCode} — ${response.body}");
       return false;
     } catch (e, s) {
-      print("❌ Erro no addMembros: $e");
+      print("Erro no addMembros: $e");
       print(s);
       return false;
     }
@@ -604,11 +604,11 @@ Future<bool> criarGrupo({
         return items.map((item) => Livro.fromGoogleJson(item)).toList();
       }
 
-      print("❌ Erro ao buscar livros: ${response.statusCode}");
+      print("Erro ao buscar livros: ${response.statusCode}");
       return [];
     } catch (e, s) {
-      print("❌ Erro no searchLivro: $e");
-      print("📄 Stack:\n$s");
+      print("Erro no searchLivro: $e");
+      print("Stack:\n$s");
       return [];
     }
   }
@@ -628,7 +628,6 @@ Future<bool> criarGrupo({
 
       final url = Uri.parse(ApiRoutes.topicoCriar(grupoId));
 
-      // ENVIA O OBJETO COMPLETO ‼️
       final Map<String, dynamic> bodyData = {
         "livro": livro.toJson(),
       };
@@ -657,16 +656,16 @@ Future<bool> criarGrupo({
       }
 
       if (response.statusCode == 201) {
-        print("✅ Tópico criado com sucesso!");
+        print("Tópico criado com sucesso!");
         return true;
       }
 
-      print("❌ Erro ao criar tópico: ${response.statusCode}");
-      print("📌 Body enviado: $bodyData");
-      print("📌 Resposta: ${response.body}");
+      print("Erro ao criar tópico: ${response.statusCode}");
+      print("Body enviado: $bodyData");
+      print("Resposta: ${response.body}");
       return false;
     } catch (e, s) {
-      print("❌ Erro no criarTopicoComLivro: $e");
+      print("Erro no criarTopicoComLivro: $e");
       print(s);
       return false;
     }

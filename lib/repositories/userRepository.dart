@@ -50,12 +50,12 @@ class UserRepository {
 
         return Usuario.fromJson(data['user']);
       } else {
-        print("❌ Erro ao registrar usuário: ${response.statusCode} - ${response.body}");
+        print("Erro ao registrar usuário: ${response.statusCode} - ${response.body}");
         return null;
       }
     } catch (e, s) {
-      print("❌ Exceção ao registrar usuário: $e");
-      print("📜 StackTrace completo:\n$s");
+      print("Exceção ao registrar usuário: $e");
+      print("StackTrace completo:\n$s");
       return null;
     }
   }
@@ -91,12 +91,12 @@ class UserRepository {
 
         return data['tokens']['access'];
       } else {
-        print("❌ Erro de login: ${response.statusCode} - ${response.body}");
+        print("Erro de login: ${response.statusCode} - ${response.body}");
         return null;
       }
     } catch (e, s) {
-      print("❌ Exceção ao tentar login: $e");
-      print("📜 StackTrace completo:\n$s");
+      print("Exceção ao tentar login: $e");
+      print("StackTrace completo:\n$s");
       return null;
     }
   }
@@ -131,7 +131,7 @@ class UserRepository {
 
       return null;
     } catch (e) {
-      print("❌ Erro ao atualizar token: $e");
+      print("Erro ao atualizar token: $e");
       return null;
     }
   }
@@ -164,8 +164,8 @@ class UserRepository {
     await prefs.remove('access_token');
     await prefs.remove('refresh_token');
   } catch (e, s) {
-    print("❌ Exceção ao fazer logout: $e");
-    print("📜 StackTrace completo:\n$s");
+    print("Exceção ao fazer logout: $e");
+    print("StackTrace completo:\n$s");
   }
 }
 
@@ -213,11 +213,11 @@ class UserRepository {
         }
       }
 
-      print("❌ Erro ao buscar perfil: ${response.statusCode} - ${response.body}");
+      print("Erro ao buscar perfil: ${response.statusCode} - ${response.body}");
       return null;
     } catch (e, s) {
-      print("❌ Exceção ao buscar perfil: $e");
-      print("📜 StackTrace completo:\n$s");
+      print("Exceção ao buscar perfil: $e");
+      print("StackTrace completo:\n$s");
       return null;
     }
   }
@@ -250,8 +250,8 @@ class UserRepository {
 
       return response.statusCode == 200;
     } catch (e, s) {
-      print("❌ Exceção ao alterar senha: $e");
-      print("📜 StackTrace completo:\n$s");
+      print("Exceção ao alterar senha: $e");
+      print("StackTrace completo:\n$s");
       return false;
     }
   }
@@ -308,8 +308,8 @@ class UserRepository {
 
       return [];
     } catch (e, s) {
-      print("❌ Exceção em getResenhas: $e");
-      print("📜 StackTrace:\n$s");
+      print("Exceção em getResenhas: $e");
+      print("StackTrace:\n$s");
       return [];
     }
   }
@@ -346,7 +346,7 @@ Future<bool> createResenha(Resenha resenha) async {
     }
 
     if (response.statusCode == 400) {
-      print("⚠️ Erro 400 (Já existe resenha?): ${response.body}");
+      print("Erro 400 (Já existe resenha?): ${response.body}");
       return false;
     }
 
@@ -370,8 +370,8 @@ Future<bool> createResenha(Resenha resenha) async {
 
     return false;  
   } catch (e, s) {
-    print("❌ Exceção em createResenha: $e");
-    print("📜 StackTrace:\n$s");
+    print("Exceção em createResenha: $e");
+    print("StackTrace:\n$s");
     return false;
   }
 }
@@ -435,11 +435,11 @@ Future<bool> editarPerfil({
 
     if (response.statusCode == 200) return true;
 
-    print("❌ Erro ao editar perfil (${response.statusCode}): ${response.body}");
+    print("Erro ao editar perfil (${response.statusCode}): ${response.body}");
     return false;
   } catch (e, s) {
-    print("❌ Exceção em editarPerfil: $e");
-    print("📜 StackTrace:\n$s");
+    print("Exceção em editarPerfil: $e");
+    print("StackTrace:\n$s");
     return false;
   }
 }
