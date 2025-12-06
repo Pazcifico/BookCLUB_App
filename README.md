@@ -1,4 +1,4 @@
-# BOOKCLUB 
+# BOOKCLUB - Desenvolvido por Diogo Ribeiro, Gustavo Henrique Andrade e Caio Pacífico
 
 Sistema cliente Flutter para uma rede social de leitura dinâmica, voltada para grupos de leitura, discussão de livros e interação entre leitores.
 
