@@ -162,7 +162,7 @@ class _SearchMembrosState extends State<SearchMembros> {
               const SizedBox(width: 12),
               Expanded(
                 child: Text(
-                  "$name (${user.userId})",
+                  "$name",
                   style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
                 ),
               ),

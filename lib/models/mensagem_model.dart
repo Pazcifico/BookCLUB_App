@@ -35,7 +35,10 @@ class Mensagem {
 
       conteudo: json['conteudo'] ?? "",
       imagem: json['imagem'],
-      capitulo: json['capitulo'],
+      capitulo: json['capitulo'] != null
+    ? int.tryParse(json['capitulo'].toString())
+    : null,
+
       isSpoiler: json['is_spoiler'] ?? false,
       criadoEm: DateTime.parse(json['criado_em']),
       

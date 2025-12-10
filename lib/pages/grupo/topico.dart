@@ -19,7 +19,8 @@ import 'package:BookCLUB/config/api_config.dart';
 
 class TopicPage extends StatefulWidget {
   final Topico topico;
-  static final String base = ApiConfig.baseUrl + "/media/";
+  static final String base = ApiConfig.baseUrl;
+  static final String baseProfile = ApiConfig.baseUrl + "/media/";
 
   const TopicPage({super.key, required this.topico});
 
@@ -127,7 +128,9 @@ void initState() {
             },
             'conteudo': jsonData['message'] ?? '',
             'imagem': jsonData['imagem_url'],
-            'capitulo': jsonData['capitulo'],
+            'capitulo': jsonData['capitulo'] != null
+                ? int.tryParse(jsonData['capitulo'].toString())
+                : null,
             'is_spoiler': jsonData['is_spoiler'] ?? false,
             'criado_em': criadoEm.toIso8601String(),
             'lidos_por': [],
@@ -161,7 +164,7 @@ void initState() {
   // ================= AVATAR =================
   ImageProvider avatarProvider(String? url) {
     if (url != null && url.isNotEmpty) {
-      return NetworkImage('${TopicPage.base}$url');
+      return NetworkImage('${TopicPage.baseProfile}$url');
     }
     return const AssetImage("assets/img/placeholder.jpg");
   }
@@ -169,6 +172,17 @@ void initState() {
   // ================= MONTAR MENSAGEM =================
   Widget montarMensagem(Mensagem m) {
     final avatar = avatarProvider(m.usuario?.profilePicture);
+
+    print(m);
+    if (m.usuario?.id == meuProfile?.id) {
+      return MyMessage(
+  text: m.conteudo ?? '',
+  image: m.imagem != null
+      ? '${TopicPage.base}${m.imagem}'
+      : null,
+);
+
+    }
 
     if (m.imagem != null && m.imagem!.isNotEmpty) {
       if (m.isSpoiler) {
@@ -180,13 +194,10 @@ void initState() {
         );
       }
       return ImageMessage(
+        avatar: avatar,
         image: '${TopicPage.base}${m.imagem!}',
         text: m.conteudo,
       );
-    }
-
-    if (m.usuario?.id == meuProfile?.id) {
-      return MyMessage(text: m.conteudo);
     }
 
     if (m.isSpoiler) {
@@ -618,8 +629,13 @@ class TextMessage extends StatelessWidget {
 
 class MyMessage extends StatelessWidget {
   final String text;
+  final String? image; // opcional
 
-  const MyMessage({super.key, required this.text});
+  const MyMessage({
+    super.key,
+    required this.text,
+    this.image,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -637,7 +653,16 @@ class MyMessage extends StatelessWidget {
               color: Colors.white.withOpacity(0.9),
               borderRadius: BorderRadius.circular(20),
             ),
-            child: Text(text),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                if (image != null) ...[
+                  Image.network(image!),
+                  const SizedBox(height: 8),
+                ],
+                Text(text),
+              ],
+            ),
           ),
         ),
       ],
@@ -645,11 +670,18 @@ class MyMessage extends StatelessWidget {
   }
 }
 
+
 class ImageMessage extends StatelessWidget {
+  final ImageProvider avatar;
   final String image;
   final String text;
 
-  const ImageMessage({super.key, required this.image, required this.text});
+  const ImageMessage({
+    super.key,
+    required this.avatar,
+    required this.image,
+    required this.text,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -659,24 +691,34 @@ class ImageMessage extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const SizedBox(width: 8),
+        CircleAvatar(backgroundImage: avatar),
+        const SizedBox(width: 8),
         ConstrainedBox(
           constraints: BoxConstraints(maxWidth: maxWidth),
-          child: Column(
-            children: [
-              Image.network(image),
-              if (text.isNotEmpty)
-                Container(
-                  padding: const EdgeInsets.all(8),
-                  color: Colors.white.withOpacity(0.8),
-                  child: Text(text),
-                )
-            ],
+          child: Container(
+            padding: const EdgeInsets.all(12),
+            margin: const EdgeInsets.symmetric(vertical: 6),
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.9),
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Image.network(image),
+                if (text.isNotEmpty) ...[
+                  const SizedBox(height: 8),
+                  Text(text),
+                ],
+              ],
+            ),
           ),
         ),
       ],
     );
   }
 }
+
 
 class ImageSpoilerMessage extends StatefulWidget {
   final ImageProvider avatar;
